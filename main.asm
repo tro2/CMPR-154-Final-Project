@@ -24,11 +24,17 @@ correctGuesses SDWORD 0
 ; # incorrect guesses
 missedGuesses SDWORD 0
 
+; variable for storing loop
+shouldContinueLoop DWORD 1
+
 ; user name
 name BYTE 20 DUP(""), 0
 
 ; prompt user to input choice
 choicePrompt BYTE "Please enter your choice (1-5): ", 0
+
+; error message for choicePrompt
+errorChoicePrompt BYTE "=> Error: Choice is not within bounds. Please try again.", 0
 
 ; menu to display options
 menu BYTE "*** Team Jurrasic's Guessing Game ***", 0dh,0ah,0dh,0ah,
@@ -43,13 +49,10 @@ menu BYTE "*** Team Jurrasic's Guessing Game ***", 0dh,0ah,0dh,0ah,
 
 .code
 main proc
-	LOCAL shouldContinueLoop:BYTE
-	mov shouldContinueLoop, 1
 
 ; TODO Welcome message (set name)
 
 loopStart:
-
 	call printMenu
 	call Crlf
 
@@ -64,6 +67,9 @@ loopStart:
 
 	cmp shouldContinueLoop, 0
 	jne loopStart
+
+next:
+	; exit the program message
 
 exit
 main endp
@@ -94,12 +100,24 @@ printMenu endp
 ; -----------------------------------------------
 getChoice proc USES edx
 
+prompt:
 	mov edx, OFFSET choicePrompt
 	call WriteString
 	call readDec
 	
-	; TODO implement error checking
+	cmp EAX, 0
+	jz error
+	cmp EAX, 5
+	ja error
+	jmp next
 
+error:
+	mov edx, OFFSET errorChoicePrompt
+	call WriteString
+	call Crlf
+	jmp prompt
+
+next:
 	ret
 getChoice endp
 
@@ -124,22 +142,38 @@ executeChoice proc
 	cmp eax, 5
 	je option5
 
-	option1:
+option1:
 		; call menu option 1
-
-	option2:
+	jmp next
+option2:
 		; call menu option 1
-
-	option3:
+	jmp next
+option3:
 		; call menu option 1
-
-	option4:
+	jmp next
+option4:
 		; call menu option 1
-
-	option5:
-		; call menu option 1
-
+	jmp next
+option5:
+	call menuOption5
+	
+next:
 	ret
 executeChoice endp
+
+; -----------------------------------------------
+; menuOption5 - exit
+; -----------------------------------------------
+; Does: Triggers main loop end
+; Receives: none
+; Returns: none
+; Requires: none
+; -----------------------------------------------
+menuOption5 proc
+
+	mov shouldContinueLoop, 0
+
+	ret
+menuOption5 endp
 
 end main
