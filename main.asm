@@ -28,7 +28,10 @@ missedGuesses SDWORD 0
 shouldContinueLoop DWORD 1
 
 ; user name
-name BYTE 20 DUP(""), 0
+_name BYTE 15 DUP(" "), 0		; TODO unsure why "name" is a syntax error
+
+; prompt user to input name
+namePrompt BYTE "Please enter your name (max of 15 characters): ", 0
 
 ; prompt user to input choice
 choicePrompt BYTE "Please enter your choice (1-5): ", 0
@@ -50,7 +53,7 @@ menu BYTE "*** Team Jurrasic's Guessing Game ***", 0dh,0ah,0dh,0ah,
 .code
 main proc
 
-; TODO Welcome message (set name)
+call getName
 
 loopStart:
 	mov edx, OFFSET menu
@@ -76,6 +79,27 @@ exit
 main endp
 
 ; -----------------------------------------------
+; getName
+; -----------------------------------------------
+; Does: gets user's name and sets global variable
+; Receives: none
+; Returns: none
+; Requires: none
+; -----------------------------------------------
+getName proc USES EDX EAX
+	
+prompt:
+	mov EDX, OFFSET namePrompt
+	call WriteString
+	
+	mov EDX, OFFSET _name
+	mov ECX, 16
+	call ReadString
+
+	ret
+getName endp
+
+; -----------------------------------------------
 ; getChoice
 ; -----------------------------------------------
 ; Does: Asks the user for input
@@ -83,11 +107,12 @@ main endp
 ; Returns: uint choice in EAX
 ; Requires: none
 ; -----------------------------------------------
-getChoice proc USES edx
+getChoice proc USES EDX
 
 prompt:
 	mov edx, OFFSET choicePrompt
 	call WriteString
+
 	call readDec
 	
 	cmp EAX, 0
@@ -131,13 +156,13 @@ option1:
 		; call menu option 1
 	jmp next
 option2:
-		; call menu option 1
+		; call menu option 2
 	jmp next
 option3:
-		; call menu option 1
+		; call menu option 3
 	jmp next
 option4:
-		; call menu option 1
+		; call menu option 4
 	jmp next
 option5:
 	call menuOption5
@@ -145,6 +170,58 @@ option5:
 next:
 	ret
 executeChoice endp
+
+; -----------------------------------------------
+; menuOption1 - displayBalance
+; -----------------------------------------------
+; Does: Displays User's Balance
+; Receives: none
+; Returns: none
+; Requires: none
+; -----------------------------------------------
+menuOption1 proc
+
+	ret
+menuOption1 endp
+
+; -----------------------------------------------
+; menuOption2 - Add credits to balance
+; -----------------------------------------------
+; Does: Adds user input credits to balance
+; Receives: none
+; Returns: none
+; Requires: none
+; -----------------------------------------------
+menuOption2 proc
+
+	ret
+menuOption2 endp
+
+; -----------------------------------------------
+; menuOption3 - play guessing game
+; -----------------------------------------------
+; Does: Plays the guessing game, alters balance and try counters
+; Receives: none
+; Returns: none
+; Requires: none
+; -----------------------------------------------
+menuOption3 proc
+
+	ret
+menuOption3 endp
+
+; -----------------------------------------------
+; menuOption4 - display stats
+; -----------------------------------------------
+; Does: display user statistics
+; Receives: none
+; Returns: none
+; Requires: none
+; -----------------------------------------------
+menuOption4 proc
+
+	ret
+menuOption4 endp
 
 ; -----------------------------------------------
 ; menuOption5 - exit
