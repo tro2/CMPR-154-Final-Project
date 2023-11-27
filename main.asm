@@ -53,7 +53,8 @@ main proc
 ; TODO Welcome message (set name)
 
 loopStart:
-	call printMenu
+	mov edx, OFFSET menu
+	call WriteString
 	call Crlf
 
 	call getChoice
@@ -73,22 +74,6 @@ next:
 
 exit
 main endp
-
-; -----------------------------------------------
-; printMenu
-; -----------------------------------------------
-; Does: Displays menu
-; Receives: none
-; Returns: void
-; Requires: none
-; -----------------------------------------------
-printMenu proc USES EDX
-
-	mov edx, OFFSET menu
-	call WriteString
-
-	ret
-printMenu endp
 
 ; -----------------------------------------------
 ; getChoice
