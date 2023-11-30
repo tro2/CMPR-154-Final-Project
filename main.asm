@@ -86,8 +86,12 @@ main endp
 ; Returns: none
 ; Requires: none
 ; -----------------------------------------------
-getName proc USES EDX EAX
-	
+getName proc
+
+	 push eax
+	 push ecx
+	 push edx
+
 prompt:
 	mov EDX, OFFSET namePrompt
 	call WriteString
@@ -95,6 +99,10 @@ prompt:
 	mov EDX, OFFSET _name
 	mov ECX, 16
 	call ReadString
+
+	pop edx
+	pop ecx
+	pop eax
 
 	ret
 getName endp
@@ -107,7 +115,9 @@ getName endp
 ; Returns: uint choice in EAX
 ; Requires: none
 ; -----------------------------------------------
-getChoice proc USES EDX
+getChoice proc
+
+	push edx
 
 prompt:
 	mov edx, OFFSET choicePrompt
@@ -128,6 +138,8 @@ error:
 	jmp prompt
 
 next:
+	pop edx
+
 	ret
 getChoice endp
 
