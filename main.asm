@@ -59,9 +59,11 @@ menu2 BYTE	"'s Guessing Game ***", 0dh,0ah,0dh,0ah,
 ; menu option 1
 msgBalance BYTE 'Your balance is: ', 0
 
-
-errorMsg BYTE "ERROR: Maximum allowable credit is $20.00.",0dh,0ah,
-			"Please, enter a different amount and try again.",0dh,0ah,0
+; -----------------------------------------------
+; menu option 2
+addPrompt BYTE "Please enter the amount you would like to add: ",0
+errorMsg BYTE "=> ERROR: You can only add between 1 and 20 dollars to your account!",0dh,0ah,
+			"=> Please, enter an valid amount and try again.",0dh,0ah,0
 
 ; -----------------------------------------------
 ; menu option 4
@@ -359,7 +361,31 @@ displayBalance endp
 ; Requires: none
 ; -----------------------------------------------
 menuOption2 proc
+	pushad
 
+enterAmount: 
+    mov edx, OFFSET addPrompt
+    call WriteString
+    call ReadInt
+
+	cmp eax, 0
+	jz error
+    cmp eax, MAX_ALLOWED
+    JA error
+    add balance, eax
+    jmp next
+
+error:
+	mov eax, red
+	call SetTextColor
+    mov edx, OFFSET errorMsg
+    call WriteString
+	mov eax, yellow
+	call SetTextColor
+    jmp enterAmount
+
+next:
+	popad
 	ret
 menuOption2 endp
 
