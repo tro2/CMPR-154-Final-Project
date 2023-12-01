@@ -55,7 +55,26 @@ menu2 BYTE	"'s Guessing Game ***", 0dh,0ah,0dh,0ah,
 			"	4. Display my statistics", 0dh,0ah,
 			"	5. Exit", 0dh,0ah,0
 
+; -----------------------------------------------
+; menu option 1
+msgBalance BYTE 'Your balance is: ', 0
 
+
+errorMsg BYTE "ERROR: Maximum allowable credit is $20.00.",0dh,0ah,
+			"Please, enter a different amount and try again.",0dh,0ah,0
+
+; -----------------------------------------------
+; menu option 4
+msgName				BYTE "'s Statistics", 0
+msgAvailableCredit	BYTE "Available credit: ", 0
+msgGamesPlayed		BYTE "Games played:     ", 0
+msgCorrectGuesses	BYTE "Correct Guesses:  ", 0
+msgMissedGuesses	BYTE "Missed Guesses:   ", 0
+msgMoneyWon			BYTE "Money you won:    ", 0
+msgMoneyLost		BYTE "Money you lost:   ", 0
+
+
+; -----------------------------------------------
 .code
 ; -----------------------------------------------
 main proc
@@ -257,16 +276,16 @@ executeChoice proc
 	je option5
 
 option1:
-		; call menu option 1
+	call menuOption1
 	jmp next
 option2:
-		; call menu option 2
+	call menuOption2
 	jmp next
 option3:
-		; call menu option 3
+	call menuOption3
 	jmp next
 option4:
-		; call menu option 4
+	call menuOption4
 	jmp next
 option5:
 	call menuOption5
@@ -284,9 +303,52 @@ executeChoice endp
 ; Requires: none
 ; -----------------------------------------------
 menuOption1 proc
+	pushad
 
+	mov edx, OFFSET msgBalance
+    call WriteString
+	mov eax, lightGreen
+	call SetTextColor
+	mov eax, balance
+	call displayBalance
+	mov eax, yellow
+	call SetTextColor
+
+	popad
 	ret
 menuOption1 endp
+
+
+; -----------------------------------------------
+; displayBalance helper
+; -----------------------------------------------
+; Does: Formats and prints number as money
+; Receives: none
+; Returns: none
+; Requires: number to display in eax
+; -----------------------------------------------
+displayBalance proc
+	pushad
+	
+	; moving balance out of the way
+	mov ebx, eax
+
+	mov al, '$'
+	call WriteChar
+
+	; moving it back in
+	mov eax, ebx
+    call WriteDec
+	mov al, '.'
+	call WriteChar
+	mov al, '0'
+	call WriteChar
+	mov al, '0'
+	call WriteChar
+
+	popad
+	ret
+displayBalance endp
 
 ; -----------------------------------------------
 ; menuOption2 - Add credits to balance
@@ -323,7 +385,71 @@ menuOption3 endp
 ; Requires: none
 ; -----------------------------------------------
 menuOption4 proc
+	pushad
+	
+	; Display name
+    mov edx, OFFSET _name
+    call WriteString
+    mov edx, OFFSET msgName
+	call WriteString
+	call Crlf
+	call Crlf
+	
+    mov edx, OFFSET msgAvailableCredit
+    call WriteString
+	mov eax, lightGreen
+	call SetTextColor
+	mov eax, balance
+    call displayBalance
+	mov eax, yellow
+	call SetTextColor
+    call Crlf
 
+    ; Display games played
+    mov edx, OFFSET msgGamesPlayed
+    call WriteString
+    mov eax, correctGuesses
+    add eax, missedGuesses
+    call WriteDec
+    call Crlf
+
+    ; Display correct guesses
+    mov edx, OFFSET msgCorrectGuesses
+    call WriteString
+    mov eax, correctGuesses
+    call WriteDec
+    call Crlf
+
+    ; Display missed guesses
+    mov edx, OFFSET msgMissedGuesses
+    call WriteString
+    mov eax, missedGuesses
+    call WriteDec
+    call Crlf
+
+    ; Display money you won
+    mov edx, OFFSET msgMoneyWon
+	call WriteString
+    mov eax, lightGreen
+	call SetTextColor
+	mov eax, moneyWon
+    call displayBalance
+	mov eax, yellow
+	call SetTextColor
+    call Crlf 
+
+    ; Display money you lost
+    mov edx, OFFSET msgMoneyLost
+    call WriteString
+    mov eax, lightRed
+	call SetTextColor
+	mov eax, moneyLost
+    call displayBalance
+	mov eax, yellow
+	call SetTextColor
+    call Crlf
+
+	popad
 	ret
 menuOption4 endp
 
