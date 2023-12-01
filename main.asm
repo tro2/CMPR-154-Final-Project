@@ -7,57 +7,68 @@
 
 include Irvine32.inc
 
+; -----------------------------------------------
 .data
-; user balance (initially 0)
+; -----------------------------------------------
+
+; user balance
 balance DWORD 0
 
-; maximum number of credits allowed
+; maximum number of credits allowed to be added at a time
 MAX_ALLOWED DWORD 20
 
-; TODO figure out where this goes
-errorMsg BYTE "ERROR: Maximum allowable credit is $20.00.",0dh,0ah,
-			"Please, enter a different amount and try again.",0dh,0ah,0
-
-; number of times the user guessed correctly
 correctGuesses SDWORD 0
-
-; # incorrect guesses
 missedGuesses SDWORD 0
+moneyWon SDWORD 0
+moneyLost SDWORD 0
 
 ; variable for storing loop
 shouldContinueLoop DWORD 1
 
+
+; -----------------------------------------------
 ; user name
-_name BYTE 15 DUP(" "), 0		; TODO unsure why "name" is a syntax error
+_name BYTE 15 DUP(" "), 0
 
 ; prompt user to input name
-namePrompt BYTE "Please enter your name (max of 15 characters): ", 0
+namePrompt1 BYTE	"Hello! Welcome to Team ",0
+namePrompt2 BYTE	"'s Guessing Game!", 0dh, 0ah,
+					"Please enter your name (max of 15 characters): ", 0
 
-; prompt user to input choice
-choicePrompt BYTE "Please enter your choice (1-5): ", 0
+; -----------------------------------------------
+; prompt user to input menu choice
+choicePrompt BYTE "Enter your choice (1-5): ", 0
 
 ; error message for choicePrompt
 errorChoicePrompt BYTE "=> Error: Choice is not within bounds. Please try again.", 0
 
+
+; -----------------------------------------------
 ; menu to display options
-menu BYTE "*** Team Jurrasic's Guessing Game ***", 0dh,0ah,0dh,0ah,
+menu1 BYTE	"*** Team ",0
+menu2 BYTE	"'s Guessing Game ***", 0dh,0ah,0dh,0ah,
 			"*** MAIN MENU ***", 0dh,0ah,0dh,0ah,
 			"Please Select one of the following options: ", 0dh,0ah,0dh,0ah,
 			"	1. Display available balance", 0dh,0ah,
 			"	2. Add credits to my account", 0dh,0ah,
 			"	3. Play the game", 0dh,0ah,
-			"	4. Display my statics", 0dh,0ah,
+			"	4. Display my statistics", 0dh,0ah,
 			"	5. Exit", 0dh,0ah,0
 
 
 .code
+; -----------------------------------------------
 main proc
+
+; set default text color
+mov eax, yellow
+call SetTextColor
 
 call getName
 
 loopStart:
-	mov edx, OFFSET menu
-	call WriteString
+	call Crlf
+	call printMenu
 	call Crlf
 
 	call getChoice
@@ -65,7 +76,6 @@ loopStart:
 
 	call executeChoice
 
-	call WaitMsg
 	call Crlf
 	call Crlf
 
@@ -79,6 +89,68 @@ exit
 main endp
 
 ; -----------------------------------------------
+; printJurrassic
+; -----------------------------------------------
+; Does: Prints "Jurrasic" in rainbow text to the console
+; Receives: none
+; Returns: none
+; Requires: none
+; -----------------------------------------------
+printJurassic proc
+	pushad
+
+	; print "Jurrasic" in rainbow color
+
+	mov eax, lightRed
+	call SetTextColor
+	mov al, 'J'
+	call WriteChar
+
+	mov eax, yellow
+	call SetTextColor
+	mov al, 'u'
+	call WriteChar
+
+	mov eax, green
+	call SetTextColor
+	mov al, 'r'
+	call WriteChar
+
+	mov eax, lightGreen
+	call SetTextColor
+	mov al, 'a'
+	call WriteChar
+
+	mov eax, lightCyan
+	call SetTextColor
+	mov al, 's'
+	call WriteChar
+
+	mov eax, lightBlue
+	call SetTextColor
+	mov al, 's'
+	call WriteChar
+
+	mov eax, blue
+	call SetTextColor
+	mov al, 'i'
+	call WriteChar
+
+	mov eax, magenta
+	call SetTextColor
+	mov al, 'c'
+	call WriteChar
+
+	; reset color
+
+	mov eax, yellow
+	call SetTextColor
+
+	popad
+	ret
+printJurassic endp
+
+; -----------------------------------------------
 ; getName
 ; -----------------------------------------------
 ; Does: gets user's name and sets global variable
@@ -87,25 +159,43 @@ main endp
 ; Requires: none
 ; -----------------------------------------------
 getName proc
-
-	 push eax
-	 push ecx
-	 push edx
+	pushad
 
 prompt:
-	mov EDX, OFFSET namePrompt
+	mov EDX, OFFSET namePrompt1
+	call WriteString
+	call printJurassic
+	mov EDX, OFFSET namePrompt2
 	call WriteString
 	
 	mov EDX, OFFSET _name
 	mov ECX, 16
 	call ReadString
 
-	pop edx
-	pop ecx
-	pop eax
-
+	popad
 	ret
 getName endp
+
+; -----------------------------------------------
+; printMenu
+; -----------------------------------------------
+; Does: prints choice menu
+; Receives: none
+; Returns: none
+; Requires: none
+; -----------------------------------------------
+printMenu proc
+	pushad
+
+	mov EDX, OFFSET menu1
+	call WriteString
+	call printJurassic
+	mov EDX, OFFSET menu2
+	call WriteString
+
+	popad
+	ret
+printMenu endp
 
 ; -----------------------------------------------
 ; getChoice
@@ -116,7 +206,6 @@ getName endp
 ; Requires: none
 ; -----------------------------------------------
 getChoice proc
-
 	push edx
 
 prompt:
@@ -132,14 +221,17 @@ prompt:
 	jmp next
 
 error:
+	mov eax, red
+	call SetTextColor
 	mov edx, OFFSET errorChoicePrompt
 	call WriteString
+	mov eax, yellow
+	call SetTextColor
 	call Crlf
 	jmp prompt
 
 next:
 	pop edx
-
 	ret
 getChoice endp
 
