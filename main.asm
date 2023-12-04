@@ -66,6 +66,15 @@ errorMsg BYTE "=> ERROR: You can only add between 1 and 20 dollars to your accou
 			"=> Please, enter an valid amount and try again.",0dh,0ah,0
 
 ; -----------------------------------------------
+; menu option 3
+guessPrompt BYTE "Welcome to the guessing game! The cost to play is $1.00.", 0dh,0ah, 0dh, 0ah,
+				 "Guess a number between 1 and 10: ", 0
+winMsg BYTE "Congratuations, you guessed correctly! Here's your $2.00!",0
+loseMsg BYTE "Oh! Sorry, you guessed incorrectly. The correct answer was: ", 0
+redoPrompt BYTE "Would you like to play again? (y/n): ", 0
+brokeMsg BYTE "Uh oh! You have no money in your account, add some before playing again!", 0
+
+; -----------------------------------------------
 ; menu option 4
 msgName				BYTE "'s Statistics", 0
 msgAvailableCredit	BYTE "Available credit: ", 0
@@ -86,9 +95,9 @@ mov eax, yellow
 call SetTextColor
 
 call getName
+call Clrscr
 
 loopStart:
-	call Crlf
 	call printMenu
 	call Crlf
 
@@ -98,7 +107,8 @@ loopStart:
 	call executeChoice
 
 	call Crlf
-	call Crlf
+	call WaitMsg
+	call Clrscr
 
 	cmp shouldContinueLoop, 0
 	jne loopStart
@@ -398,7 +408,65 @@ menuOption2 endp
 ; Requires: none
 ; -----------------------------------------------
 menuOption3 proc
+	pushad
+	
+guess:
+	cmp balance, 0
+	jle noMoney
+	dec balance
 
+	call Randomize
+	mov EAX, 10
+	call RandomRange
+	inc EAX
+	mov EBX, EAX
+
+	mov EDX, OFFSET guessPrompt
+	call WriteString
+	call ReadDec
+
+	cmp EAX, EBX
+	jnz incorrect
+
+correct:
+	inc correctGuesses
+	add moneyWon, 2
+	call Crlf
+	mov EDX, OFFSET winMsg
+	call WriteString
+	call Crlf
+	jmp redo
+
+incorrect:
+	inc missedGuesses
+	inc moneyLost
+	call Crlf
+	mov EDX, OFFSET loseMsg
+	call WriteString
+	mov EAX, EBX
+	call WriteDec
+	call Crlf
+
+redo:
+	mov EDX, OFFSET redoPrompt
+	call WriteString
+	call ReadChar
+	call Crlf
+
+	cmp al, 'y'
+	jz guess
+	jmp next
+
+noMoney:
+	mov EAX, lightRed
+	call SetTextColor
+	mov EDX, OFFSET brokeMSG
+	call WriteString
+	mov EAX, yellow
+	call SetTextColor
+
+next:
+	popad
 	ret
 menuOption3 endp
 
